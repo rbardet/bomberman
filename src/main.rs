@@ -1,3 +1,6 @@
+mod window;
+
 fn main() {
-    println!("Hello, world!");
+    let ctx: window::WindowContext = window::init_window();
+    window::show_window(ctx);
 }
