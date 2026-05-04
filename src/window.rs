@@ -1,9 +1,9 @@
 use beryllium::{Sdl, events, init, video};
 
-struct WindowConfig {
+use crate::settings::Settings;
+
+pub struct WindowConfig {
     title: &'static str,
-    width: i32,
-    height: i32,
     allow_high_dpi: bool,
     borderless: bool,
     resizable: bool,
@@ -16,14 +16,12 @@ pub struct WindowContext {
 
 const WINDOW_CONFIG: WindowConfig = WindowConfig {
     title: "Bomberman",
-    width: 800,
-    height: 600,
     allow_high_dpi: true,
     borderless: false,
     resizable: true,
 };
 
-pub fn init_window() -> WindowContext {
+pub fn init_window(settings: Settings) -> WindowContext {
     let sdl: Sdl = Sdl::init(init::InitFlags::EVERYTHING);
 
     sdl.set_gl_context_major_version(3)
@@ -33,8 +31,8 @@ pub fn init_window() -> WindowContext {
 
     let win_args: video::CreateWinArgs<'_> = video::CreateWinArgs {
         title: WINDOW_CONFIG.title,
-        width: WINDOW_CONFIG.width,
-        height: WINDOW_CONFIG.height,
+        width: settings.video.width as i32,
+        height: settings.video.height as i32,
         allow_high_dpi: WINDOW_CONFIG.allow_high_dpi,
         borderless: WINDOW_CONFIG.borderless,
         resizable: WINDOW_CONFIG.resizable,
