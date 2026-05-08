@@ -1,58 +1,79 @@
-use beryllium::{Sdl, events, init, video};
+use sdl2::{self, event::Event, keyboard::Keycode};
 
 use crate::settings::Settings;
 
-pub struct WindowConfig {
-    title: &'static str,
-    allow_high_dpi: bool,
-    borderless: bool,
-    resizable: bool,
+pub struct SDLWindowContext {
+    sdl_ctx: sdl2::Sdl,
+	opengl_ctx: sdl2::video::GLContext,
+    window_ctx: sdl2::video::Window,
 }
 
-pub struct WindowContext {
-    sdl: Sdl,
-    win: video::GlWindow,
+const WINDOW_TITLE: &'static str = "Bomberman v0.1";
+
+pub fn init_window(settings: Settings) -> SDLWindowContext {
+    let sdl_ctx: sdl2::Sdl = sdl2::init().expect("SDL: Failed on init.");
+    let video_subsystem: sdl2::VideoSubsystem = sdl_ctx.video().unwrap();
+
+    let gl_attr = video_subsystem.gl_attr();
+    gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
+    gl_attr.set_context_version(3, 3);
+    gl_attr.set_stencil_size(8);
+
+    let window_ctx: sdl2::video::Window = video_subsystem
+        .window(
+            WINDOW_TITLE,
+            settings.video.width,
+            settings.video.height,
+        )
+        .opengl()
+        .build()
+        .expect("SDL: Failed to create window.");
+
+    let opengl_ctx: sdl2::video::GLContext = window_ctx.gl_create_context().unwrap();
+    gl::load_with(|s: &'static str| video_subsystem.gl_get_proc_address(s) as *const _);
+
+    SDLWindowContext {
+        sdl_ctx,
+		opengl_ctx,
+        window_ctx
+    }
 }
 
-const WINDOW_CONFIG: WindowConfig = WindowConfig {
-    title: "Bomberman",
-    allow_high_dpi: true,
-    borderless: false,
-    resizable: true,
-};
+pub fn run_window(ctx: &mut SDLWindowContext) {
+    let mut event_pump: sdl2::EventPump = ctx.sdl_ctx.event_pump().unwrap();
+    let mut is_running: bool = true;
 
-pub fn init_window(settings: Settings) -> WindowContext {
-    let sdl: Sdl = Sdl::init(init::InitFlags::EVERYTHING);
-
-    sdl.set_gl_context_major_version(3)
-        .expect("failed to set OpenGL version");
-    sdl.set_gl_profile(video::GlProfile::Core)
-        .expect("failed to set OpenGL Core profile");
-
-    let win_args: video::CreateWinArgs<'_> = video::CreateWinArgs {
-        title: WINDOW_CONFIG.title,
-        width: settings.video.width as i32,
-        height: settings.video.height as i32,
-        allow_high_dpi: WINDOW_CONFIG.allow_high_dpi,
-        borderless: WINDOW_CONFIG.borderless,
-        resizable: WINDOW_CONFIG.resizable,
-    };
-
-    let win: video::GlWindow = sdl
-        .create_gl_window(win_args)
-        .expect("window creation failed");
-
-    WindowContext { sdl, win }
-}
-
-pub fn show_window(ctx: WindowContext) {
-    'main_loop: loop {
-        while let Some(event) = ctx.sdl.poll_events() {
-            match event {
-                (events::Event::Quit, _) => break 'main_loop,
-                _ => (),
-            }
+    loop {
+        for event in event_pump.poll_iter() {
+            sdl_handle_event(&mut ctx.window_ctx, event, &mut is_running);
         }
-        ctx.win.swap_window();
+
+        if !is_running {
+            break;
+        }
+
+        unsafe {
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+
+        ctx.window_ctx.gl_swap_window();
+    }
+}
+
+fn sdl_handle_event(
+    window: &mut sdl2::video::Window,
+    event: sdl2::event::Event,
+    is_running: &mut bool,
+) {
+    match event {
+        Event::Quit { .. }
+        | Event::KeyDown {
+            keycode: Some(Keycode::Escape),
+            ..
+        } => {
+            *is_running = false;
+        }
+        // Handle other events here
+        _ => {}
     }
 }

@@ -1,11 +1,6 @@
 use std::{fs, path::PathBuf};
 
-use beryllium::events::{
-    SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_DOWN, SDL_SCANCODE_I, SDL_SCANCODE_J,
-    SDL_SCANCODE_K, SDL_SCANCODE_KP_0, SDL_SCANCODE_KP_4, SDL_SCANCODE_KP_5, SDL_SCANCODE_KP_6,
-    SDL_SCANCODE_KP_8, SDL_SCANCODE_L, SDL_SCANCODE_LCTRL, SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT,
-    SDL_SCANCODE_S, SDL_SCANCODE_SPACE, SDL_SCANCODE_U, SDL_SCANCODE_UP, SDL_SCANCODE_W,
-};
+use sdl2::keyboard::Scancode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -50,13 +45,14 @@ pub fn save_settings(settings: &Settings) {
         fs::create_dir_all(parent).expect("Failed to create config folder")
     }
 
-    let json = serde_json::to_string_pretty(settings).expect("Failed to save settings");
+    let json: String = serde_json::to_string_pretty(settings).expect("Failed to save settings");
 
     fs::write(get_settings_file_path(), json).expect("Failed to save settings");
 }
 
 pub fn load_settings() -> Settings {
-    let json = fs::read_to_string(get_settings_file_path()).expect("Failed to load settings");
+    let json: String =
+        fs::read_to_string(get_settings_file_path()).expect("Failed to load settings");
 
     let settings: Settings = serde_json::from_str(&json).expect("Failed to load settings");
 
@@ -64,12 +60,12 @@ pub fn load_settings() -> Settings {
 }
 
 pub fn init_settings() -> Settings {
-    let config_file = get_settings_file_path();
+    let config_file: PathBuf = get_settings_file_path();
 
     if config_file.exists() {
         load_settings()
     } else {
-        let settings = init_default_settings();
+        let settings: Settings = init_default_settings();
         save_settings(&settings);
         settings
     }
@@ -84,32 +80,32 @@ fn init_default_settings() -> Settings {
         },
         players: vec![
             KeyBindings {
-                move_up: SDL_SCANCODE_W.0 as u32,
-                move_down: SDL_SCANCODE_S.0 as u32,
-                move_left: SDL_SCANCODE_A.0 as u32,
-                move_right: SDL_SCANCODE_D.0 as u32,
-                place_bomb: SDL_SCANCODE_SPACE.0 as u32,
+                move_up: Scancode::W as u32,
+                move_down: Scancode::S as u32,
+                move_left: Scancode::A as u32,
+                move_right: Scancode::D as u32,
+                place_bomb: Scancode::Space as u32,
             },
             KeyBindings {
-                move_up: SDL_SCANCODE_UP.0 as u32,
-                move_down: SDL_SCANCODE_DOWN.0 as u32,
-                move_left: SDL_SCANCODE_LEFT.0 as u32,
-                move_right: SDL_SCANCODE_RIGHT.0 as u32,
-                place_bomb: SDL_SCANCODE_LCTRL.0 as u32,
+                move_up: Scancode::Up as u32,
+                move_down: Scancode::Down as u32,
+                move_left: Scancode::Left as u32,
+                move_right: Scancode::Right as u32,
+                place_bomb: Scancode::LCtrl as u32,
             },
             KeyBindings {
-                move_up: SDL_SCANCODE_KP_8.0 as u32,
-                move_down: SDL_SCANCODE_KP_5.0 as u32,
-                move_left: SDL_SCANCODE_KP_4.0 as u32,
-                move_right: SDL_SCANCODE_KP_6.0 as u32,
-                place_bomb: SDL_SCANCODE_KP_0.0 as u32,
+                move_up: Scancode::Kp8 as u32,
+                move_down: Scancode::Kp5 as u32,
+                move_left: Scancode::Kp4 as u32,
+                move_right: Scancode::Kp6 as u32,
+                place_bomb: Scancode::Kp0 as u32,
             },
             KeyBindings {
-                move_up: SDL_SCANCODE_I.0 as u32,
-                move_down: SDL_SCANCODE_K.0 as u32,
-                move_left: SDL_SCANCODE_J.0 as u32,
-                move_right: SDL_SCANCODE_L.0 as u32,
-                place_bomb: SDL_SCANCODE_U.0 as u32,
+                move_up: Scancode::I as u32,
+                move_down: Scancode::K as u32,
+                move_left: Scancode::J as u32,
+                move_right: Scancode::L as u32,
+                place_bomb: Scancode::U as u32,
             },
         ],
     }
