@@ -1,13 +1,12 @@
-use crate::{
-    settings::{Settings, init_settings},
-    window::{SDLWindowContext, init_window, run_window},
-};
+use crate::engine::Engine;
 
+mod audio;
 mod settings;
 mod window;
+mod engine;
 
-fn main() {
-    let settings: Settings = init_settings();
-    let mut ctx: SDLWindowContext = init_window(settings);
-    run_window(&mut ctx);
+fn main()
+{
+    let engine = Engine::init().unwrap();
+    engine.win_ctx().run_window(engine.sdl());
 }
